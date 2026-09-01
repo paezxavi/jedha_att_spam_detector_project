@@ -1,0 +1,33 @@
+# AT&T spam detector — SMS classification, PyTorch + HuggingFace transformers
+# Install with:  python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+#
+# The notebook runs on a GPU if one is visible (about 4 minutes) and on a CPU otherwise
+# (about 20). It downloads the DistilBERT weights from the HuggingFace hub on first run
+# (~268 MB, cached afterwards in ~/.cache/huggingface).
+
+# --- Deep learning ---
+torch==2.13.0               # the CUDA build is the default wheel on PyPI; it falls back to CPU
+transformers==5.16.1        # AutoTokenizer / AutoModelForSequenceClassification. v5 is PyTorch
+                            # only -- the TensorFlow classes were removed in this major version.
+tokenizers==0.23.1          # pulled by transformers, pinned so the tokenizer cannot drift
+huggingface-hub==1.29.0     # downloads distilbert-base-uncased
+safetensors==0.8.0
+
+# --- The reference model and the metrics ---
+scikit-learn==1.9.0         # TfidfVectorizer, LinearSVC, the split, f1_score, the PR curve
+
+# --- Notebook & data manipulation ---
+pandas==3.0.5
+numpy==2.5.2
+ipykernel==7.3.0            # Jupyter kernel for spam_detector_project.ipynb
+ipywidgets==8.1.9           # only to silence tqdm's "IProgress not found" notice in the output
+
+# --- Visualisation ---
+plotly==7.0.0               # the three charts
+kaleido==1.4.0              # renders them as static PNG, both inline (so the notebook stays
+                            # readable on GitHub, which strips interactive plotly output) and
+                            # into images/. Needs a Chrome:  .venv/bin/plotly_get_chrome
+nbformat==5.11.1            # required by plotly to render figures inside the notebook
+
+# --- Running the notebook headlessly ---
+nbclient==0.11.0            # only needed to execute the notebook from the command line
