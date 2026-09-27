@@ -21,10 +21,6 @@ scoring them the same way:
 | **From scratch** | an embedding layer + a bidirectional LSTM, learned from these messages only | 0.6 M |
 | **Transfer** | `distilbert-base-uncased`, pretrained on 3 billion words, fine-tuned here | 67 M |
 
-> The two ends of that table score the **same f1**. The 67-million-parameter model does not win on
-> the metric the brief asks for — it wins on *which mistakes it makes*, and once it is forced to
-> stop making the expensive one, it reproduces the reference model exactly.
-
 ## The dataset
 
 `data/spam.csv` — 5 572 SMS labelled `ham` or `spam`, **13.4% of them spam**. Two things about the
