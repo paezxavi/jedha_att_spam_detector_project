@@ -49,14 +49,11 @@ customer, a **false positive** is a real message from a real person that AT&T wi
 
 ## What we found
 
-### Before reading a word, f1 = 0.86
+### What a spam SMS looks like
 
-![The shape of a spam](images/1_shape_of_a_spam.png)
+![Message length and digit count, by class](images/1_shape_of_a_spam.png)
 
 A spam SMS is **138 characters against 71** for a real one, and carries **15 digits against 0.3**.
-Four counts — length, word count, digits, uppercase ratio — and a logistic regression catch **92%
-of the spam** while withholding 28 real messages. That is the floor the rest of the project builds
-on.
 
 ### The same score, different mistakes
 
