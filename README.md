@@ -29,7 +29,7 @@ file decide what a score means, and both are settled before any model is trained
 - **The three `Unnamed` columns are not debris — they are the end of 50 messages.** The file is a
   CSV of unescaped text, so every message containing a comma inside a quote was split across the
   extra columns. Dropping them, which is the usual first line of every tutorial, throws away **40%
-  of those messages** (92 characters kept out of 156) — and it truncates them exactly where the
+  of the text of those messages** (92 characters kept out of 156) — and it truncates them exactly where the
   phone number and the price live. They are put back together.
 - **403 messages are exact duplicates, and a naive split puts them on both sides.** One test
   message in nine (11.6%) is a verbatim copy of a training message, and the model is **perfect** on
@@ -37,8 +37,7 @@ file decide what a score means, and both are settled before any model is trained
   before the split, which leaves **5 169**.
 
 Neither decision is worth a point of score — the four possible protocols land within 0.005 f1 of
-each other, less than the spread between two random seeds. They change what the number *means*,
-not what it is, and the notebook says so rather than claiming a gain.
+each other. They change what the number *means*, not what it is, and the notebook says so rather than claiming a gain.
 
 ## The metric
 
@@ -55,7 +54,7 @@ customer, a **false positive** is a real message from a real person that AT&T wi
 
 A spam SMS is **138 characters against 71** for a real one, and carries **15 digits against 0.3**.
 
-### The same score, different mistakes
+### The comparison over five seeds
 
 ![Model comparison](images/2_model_comparison.png)
 
@@ -67,47 +66,33 @@ Five seeds, each one re-splitting and re-training all three models:
 | BiLSTM from scratch | 0.9043 | 0.0272 | 7.6 | 16.6 |
 | DistilBERT fine-tuned | **0.9601** | 0.0056 | 4.2 | **6.2** |
 
-- **The network trained from scratch loses to the linear model by six points.** 4 135 messages are
-  not enough to learn what English words mean; 384 000 of its 583 000 parameters are an embedding
-  table being asked to do exactly that.
+- **The network trained from scratch loses to the linear model by six points.** It has 583 170
+  parameters, 384 000 of them an embedding table, and 4 135 messages to learn them from.
 - **DistilBERT ties the linear model on f1** — the gap between the means is smaller than one
   standard deviation of either. What it buys is a different error profile: three fewer spams
   delivered per split, ten times more real messages blocked.
-
-### The threshold settles it, and not in the transformer's favour
-
-![Threshold](images/3_threshold.png)
-
-Pushed to the point where it blocks nothing — a cut at 0.96, chosen on a validation split —
-DistilBERT lands on **exactly the reference model's numbers**: f1 0.9644, recall 0.931, nine spams
-missed. Not close to them, the same ones. Its extra recall was bought from precision at a fixed
-rate, and once the false alarms are given back there is nothing left over.
-
-At equal precision the two models even fail in the same places: two spams each, in either
-direction. What **both** miss is spam that does not look like spam — a quiz question, an order
-confirmation, a joke — carrying no number, no price and no shouting, because the message *is* the
-bait and the payload arrives in the reply.
 
 ## What AT&T should deploy
 
 | | f1 | size | one SMS |
 |---|---|---|---|
-| TF-IDF + linear SVM | 0.9603 | 0.9 MB | **0.5 ms** (CPU) |
-| DistilBERT fine-tuned | 0.9601 | 268 MB | 4 ms (GPU) / **16 ms** (CPU) |
+| TF-IDF + linear SVM | 0.9603 | 0.9 MB | **1.17 ms** (CPU) |
+| DistilBERT fine-tuned | 0.9601 | 268 MB | 4.10 ms (GPU) / **14 ms** (CPU) |
 
 1. **Deploy the linear model.** f1 0.96 on messages it has never seen, essentially no legitimate
-   message blocked, trains in under a second, weighs a megabyte, scores an SMS in half a
+   message blocked, trains in under a second, weighs a megabyte, scores an SMS in about a
    millisecond on one CPU core, needs no accelerator anywhere in the stack.
-2. **The transformer earns its place only if AT&T will pay for it in false alarms.** If it is
-   deployed at all, it belongs behind the cheap model, scoring only the messages the linear one is
-   unsure about.
-3. **The deep learning result worth stating is a negative one:** on 4 000 messages, a network
-   trained from scratch is beaten by TF-IDF. Every point DistilBERT adds comes from the 3 billion
-   words it read before it ever saw an SMS — the pretraining, not the depth.
-4. **What would move the score is not a bigger model.** Both models fail on the same conversational
-   bait, and that failure is not visible in the text of one message. It needs what this file does
-   not contain: the sender, the time, whether the same text went to ten thousand handsets in one
-   minute.
+2. **DistilBERT is worth it only if AT&T cares more about the spam it misses than about the real
+   messages it blocks.** Over the five splits, it lets through about 3 fewer spams per split and
+   blocks about 4 more real messages. It also weighs 268 MB against 0.9 MB, and is slower per
+   message.
+3. **The deep learning result worth stating is a negative one:** on 4 135 messages, a network
+   trained from scratch is beaten by TF-IDF. DistilBERT closes that gap, but it is both a far larger
+   transformer and pretrained on 3 billion words.
+4. **What would move the score is not a bigger model.** Two things could help, neither tested
+   here. More spam examples in the training set: AT&T already flags spam by hand, so the model
+   can be retrained regularly on what it flags. And information this file does not contain — the
+   sender, the time, whether the same text went to ten thousand handsets in one minute.
 
 ## Reproducing
 
@@ -132,6 +117,6 @@ If `kaleido` cannot find a browser for the charts, run `.venv/bin/plotly_get_chr
 ```
 spam_detector_project.ipynb   the analysis — sections 1 to 8
 data/spam.csv                 5 572 labelled SMS
-images/                       the three charts, also embedded in the notebook
+images/                       the two charts, also embedded in the notebook
 requirements.txt              pinned versions
 ```

@@ -14,7 +14,7 @@ huggingface-hub==1.29.0     # downloads distilbert-base-uncased
 safetensors==0.8.0
 
 # --- The reference model and the metrics ---
-scikit-learn==1.9.0         # TfidfVectorizer, LinearSVC, the split, f1_score, the PR curve
+scikit-learn==1.9.0         # TfidfVectorizer, LinearSVC, the split, f1_score, the confusion matrix
 
 # --- Notebook & data manipulation ---
 pandas==3.0.5
@@ -23,7 +23,7 @@ ipykernel==7.3.0            # Jupyter kernel for spam_detector_project.ipynb
 ipywidgets==8.1.9           # only to silence tqdm's "IProgress not found" notice in the output
 
 # --- Visualisation ---
-plotly==7.0.0               # the three charts
+plotly==7.0.0               # the two charts
 kaleido==1.4.0              # renders them as static PNG, both inline (so the notebook stays
                             # readable on GitHub, which strips interactive plotly output) and
                             # into images/. Needs a Chrome:  .venv/bin/plotly_get_chrome
